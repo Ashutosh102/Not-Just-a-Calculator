@@ -101,7 +101,6 @@ export default function Home() {
         }
     };
 
-
     const resetCanvas = () => {
         const canvas = canvasRef.current;
         if (canvas) {
@@ -112,19 +111,22 @@ export default function Home() {
         }
     };
 
-    const startDrawing = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    const startDrawing = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
         const canvas = canvasRef.current;
         if (canvas) {
             canvas.style.background = 'black';
             const ctx = canvas.getContext('2d');
             if (ctx) {
+                const offsetX = 'touches' in e ? e.touches[0].clientX - canvas.offsetLeft : e.nativeEvent.offsetX;
+                const offsetY = 'touches' in e ? e.touches[0].clientY - canvas.offsetTop : e.nativeEvent.offsetY;
                 ctx.beginPath();
-                ctx.moveTo(e.nativeEvent.offsetX, e.nativeEvent.offsetY);
+                ctx.moveTo(offsetX, offsetY);
                 setIsDrawing(true);
             }
         }
     };
-    const draw = (e: React.MouseEvent<HTMLCanvasElement>) => {
+
+    const draw = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
         if (!isDrawing) {
             return;
         }
@@ -132,12 +134,15 @@ export default function Home() {
         if (canvas) {
             const ctx = canvas.getContext('2d');
             if (ctx) {
+                const offsetX = 'touches' in e ? e.touches[0].clientX - canvas.offsetLeft : e.nativeEvent.offsetX;
+                const offsetY = 'touches' in e ? e.touches[0].clientY - canvas.offsetTop : e.nativeEvent.offsetY;
                 ctx.strokeStyle = color;
-                ctx.lineTo(e.nativeEvent.offsetX, e.nativeEvent.offsetY);
+                ctx.lineTo(offsetX, offsetY);
                 ctx.stroke();
             }
         }
     };
+
     const stopDrawing = () => {
         setIsDrawing(false);
     };
@@ -199,8 +204,6 @@ export default function Home() {
 
     return (
         <>
-         
-
             <div className="flex flex-wrap justify-between items-center p-2 bg-black">
                 <Button
                     onClick={() => setReset(true)}
@@ -256,9 +259,6 @@ export default function Home() {
                         </ColorSwatch>
                     ))}
                 </Group>
-               
-               
-               
             </div>
             <canvas
                 ref={canvasRef}
@@ -268,6 +268,9 @@ export default function Home() {
                 onMouseMove={draw}
                 onMouseUp={stopDrawing}
                 onMouseOut={stopDrawing}
+                onTouchStart={startDrawing}
+                onTouchMove={draw}
+                onTouchEnd={stopDrawing}
             />
 
             {latexExpression && latexExpression.map((latex, index) => (
@@ -284,3 +287,5 @@ export default function Home() {
         </>
     );
 }
+
+
